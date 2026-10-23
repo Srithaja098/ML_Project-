@@ -4,3 +4,7 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 .vscode/
+# Generated datasets, models and outputs
+/data/
+/artifacts/
+/outputs/
