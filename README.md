@@ -189,6 +189,43 @@ python -m unittest -v test_clustering
 
 Saved figures are in `outputs/clustering/` (`kmeans_elbow_silhouette.png`, `hierarchical_dendrogram.png`, `dbscan_k_distance.png`, `gmm_bic_aic.png`, `pca_clustering_comparison.png`, `feature_pairwise_clusters.png`), and models are in `artifacts/clustering/`. Detailed documentation is in [`clustering/README.md`](clustering/README.md).
 
+---
+
+# Regression: Concrete Compressive Strength Dataset
+
+The `regression` module implements predictive regression models on the [UCI Concrete Compressive Strength dataset](https://archive.ics.uci.edu/dataset/165/concrete+compressive+strength) across 1,030 samples (824 training, 206 held-out test rows, seed=42) and 8 mixture/age features.
+
+Six regression models are tuned with 5-fold cross-validation on the training split and evaluated on held-out test data:
+1. **Ridge Regression:** Linear regularized baseline ($\alpha=0.1$).
+2. **K-Nearest Neighbors (KNN):** Distance-weighted regressor ($k=7$).
+3. **Decision Tree Regressor:** Non-linear decision tree (`max_depth=15`, `min_samples_leaf=2`).
+4. **Random Forest Regressor:** Bagging ensemble (`n_estimators=200`, `max_depth=None`).
+5. **Gradient Boosting Regressor:** Sequential boosting (`learning_rate=0.2`, `max_depth=3`, `n_estimators=300`).
+6. **Support Vector Regression (SVR RBF):** Kernel margin regressor ($C=200.0, \varepsilon=0.2, \gamma=0.1$).
+
+### Regression Summary Metrics
+
+| Model | 5-Fold CV RMSE (± std) | 5-Fold CV $R^2$ (± std) | Test $R^2$ (↑) | Test RMSE (↓) | Test MAE (↓) | Test MedAE (↓) | Test MAPE (↓) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Gradient Boosting** | **4.782 (±0.448)** | **0.918 (±0.018)** | **0.9336** | **4.1377** | **2.9048** | **1.8889** | **9.40%** |
+| **Random Forest** | 5.304 (±0.429) | 0.899 (±0.017) | **0.8813** | 5.5304 | 3.7875 | 2.3663 | 12.43% |
+| **SVR (RBF)** | 6.222 (±0.714) | 0.861 (±0.031) | **0.8735** | 5.7103 | 3.9584 | 2.3681 | 12.53% |
+| **Decision Tree** | 6.636 (±0.752) | 0.842 (±0.033) | 0.8028 | 7.1279 | 4.8254 | 3.2625 | 14.98% |
+| **KNN Regressor** | 8.378 (±0.517) | 0.750 (±0.030) | 0.7761 | 7.5960 | 5.6931 | 4.1819 | 19.95% |
+| **Ridge Regression** | 10.627 (±0.477) | 0.597 (±0.047) | 0.6276 | 9.7964 | 7.7462 | 5.8587 | 29.28% |
+
+### Running Regression & Tests
+
+```powershell
+# Run end-to-end regression training, CV tuning, evaluation, and plotting
+python -m regression.train
+
+# Run regression unit tests
+python -m unittest -v test_regression
+```
+
+Diagnostic figures are saved in `outputs/regression/` (`actual_vs_predicted.png`, `residuals_plot.png`, `feature_importance.png`, `cv_model_comparison.png`), models in `artifacts/regression/`. Detailed documentation is in [`regression/README.md`](regression/README.md).
+
 ## Submission checklist and open questions
 
 - The repository contains this project documentation, saved metrics, figures, model metadata, a draft outline in
@@ -198,4 +235,5 @@ Saved figures are in `outputs/clustering/` (`kmeans_elbow_silhouette.png`, `hier
 - Confirm with the instructor whether a 1D CNN over tabular features is an acceptable interpretation of the task.
 - If selecting a different CNN decision threshold is required, choose it using validation data only and report that
   policy separately; do not tune it using held-out test results.
+
 

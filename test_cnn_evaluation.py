@@ -7,9 +7,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from cnn.evaluate import CLASSICAL_MODELS, save_test_evaluation, verify_test_indices
+try:
+    import keras
+    from cnn.evaluate import CLASSICAL_MODELS, save_test_evaluation, verify_test_indices
+    HAS_KERAS = True
+except ImportError:
+    HAS_KERAS = False
 
 
+@unittest.skipUnless(HAS_KERAS, "keras/tensorflow not installed")
 class TestCnnEvaluation(unittest.TestCase):
     def test_test_indices_must_match_all_model_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
