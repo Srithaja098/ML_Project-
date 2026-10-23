@@ -154,6 +154,41 @@ command verifies that the CNN test row indices match all three classical metadat
 - `submission/AI4I_2020_Submission.zip`: curated source/data/model/results archive; excludes `.git`, `.venv`, and caches.
 - `reports/build_report.py` and `reports/build_submission_zip.py`: scripts to recreate those two deliverables.
 
+---
+
+# Clustering: Palmer Penguins Dataset
+
+The `clustering` module implements unsupervised analysis on the [UCI Palmer Penguins dataset](https://archive.ics.uci.edu/dataset/690/palmer+penguins-3) across 342 complete observations and 4 standardized morphological measurements (`bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, `body_mass_g`).
+
+Four clustering paradigms are compared:
+1. **K-Means Clustering:** Evaluated for $k \in [2, 10]$ via Elbow Inertia and Silhouette score curves ($k=3$ selected).
+2. **Hierarchical (Agglomerative) Clustering:** Evaluated linkage strategies; Ward linkage tree cut at $k=3$ with full dendrogram.
+3. **DBSCAN:** Density-based clustering with $k$-distance knee analysis ($\varepsilon=0.6, \text{min\_samples}=7$).
+4. **Gaussian Mixture Model (GMM):** Soft/hard probabilistic clustering with BIC/AIC component selection ($k=3$, full covariance).
+
+### Clustering Summary Metrics
+
+| Model | Hyperparameters | Clusters | Noise | Silhouette | Calinski-Harabasz | Davies-Bouldin | ARI (Species) | NMI (Species) | V-Measure |
+|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **GMM** | $k=3$, full cov | 3 | 0 | **0.4545** | 425.96 | 0.8956 | **0.9603** | **0.9349** | **0.9349** |
+| **Hierarchical (Ward)** | $k=3$, euclidean | 3 | 0 | 0.4541 | 420.72 | **0.8465** | **0.9159** | **0.9007** | **0.9007** |
+| **K-Means** | $k=3$, k-means++ | 3 | 0 | 0.4472 | 441.68 | 0.9436 | 0.7928 | 0.7855 | 0.7855 |
+| **DBSCAN** | $\varepsilon=0.6, \text{min}=7$ | 3 | 42 | 0.4933* | 458.80* | 0.7673* | 0.7662 | 0.7279 | 0.7279 |
+
+*\*Internal metrics on non-noise points.*
+
+### Running Clustering & Tests
+
+```powershell
+# Run end-to-end clustering pipeline
+python -m clustering.cluster
+
+# Run clustering unit tests
+python -m unittest -v test_clustering
+```
+
+Saved figures are in `outputs/clustering/` (`kmeans_elbow_silhouette.png`, `hierarchical_dendrogram.png`, `dbscan_k_distance.png`, `gmm_bic_aic.png`, `pca_clustering_comparison.png`, `feature_pairwise_clusters.png`), and models are in `artifacts/clustering/`. Detailed documentation is in [`clustering/README.md`](clustering/README.md).
+
 ## Submission checklist and open questions
 
 - The repository contains this project documentation, saved metrics, figures, model metadata, a draft outline in
@@ -163,3 +198,4 @@ command verifies that the CNN test row indices match all three classical metadat
 - Confirm with the instructor whether a 1D CNN over tabular features is an acceptable interpretation of the task.
 - If selecting a different CNN decision threshold is required, choose it using validation data only and report that
   policy separately; do not tune it using held-out test results.
+
