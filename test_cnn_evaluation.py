@@ -10,6 +10,7 @@ import pandas as pd
 try:
     import keras
     from cnn.evaluate import CLASSICAL_MODELS, save_test_evaluation, verify_test_indices
+    from cnn.model import build_cnn
     HAS_KERAS = True
 except ImportError:
     HAS_KERAS = False
@@ -17,6 +18,18 @@ except ImportError:
 
 @unittest.skipUnless(HAS_KERAS, "keras/tensorflow not installed")
 class TestCnnEvaluation(unittest.TestCase):
+    def test_cnn_forward_train_and_evaluate_on_synthetic_batch(self):
+        keras.utils.set_random_seed(42)
+        model = build_cnn(8, conv_filters=(4,), dense_units=4, dropout=0.0)
+        X = np.random.default_rng(42).normal(size=(16, 8, 1)).astype("float32")
+        y = np.array([0, 1] * 8, dtype="float32")
+        prediction = model(X, training=False).numpy()
+        self.assertEqual(prediction.shape, (16, 1))
+        self.assertTrue(np.isfinite(prediction).all())
+        model.fit(X, y, epochs=1, batch_size=4, verbose=0)
+        evaluation = model.evaluate(X, y, verbose=0, return_dict=True)
+        self.assertTrue(np.isfinite(evaluation["loss"]))
+
     def test_test_indices_must_match_all_model_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

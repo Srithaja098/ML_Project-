@@ -1,6 +1,7 @@
 """Unit tests for the regression module on Concrete Compressive Strength dataset."""
 import unittest
 from pathlib import Path
+import json
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
@@ -15,11 +16,8 @@ from regression.data import (
     split_features_target,
     train_test_split_dataset,
 )
-from regression.train import (
-    REGRESSION_ARTIFACTS_DIR,
-    REGRESSION_OUTPUTS_DIR,
-    evaluate_predictions,
-)
+from regression.train import evaluate_predictions
+from regression.assignment import OUT as ASSIGNMENT_REGRESSION_OUTPUTS
 
 
 class TestRegressionData(unittest.TestCase):
@@ -76,37 +74,27 @@ class TestRegressionMetrics(unittest.TestCase):
 
 
 class TestRegressionArtifactsAndOutputs(unittest.TestCase):
-    def test_artifacts_exist_and_non_empty(self):
-        required_artifacts = [
-            "ridge.joblib",
-            "knn.joblib",
-            "decision_tree.joblib",
-            "random_forest.joblib",
-            "gradient_boosting.joblib",
-            "svm_rbf.joblib",
-            "scaler.joblib",
-            "metadata.json",
-        ]
-        for name in required_artifacts:
-            path = REGRESSION_ARTIFACTS_DIR / name
-            self.assertTrue(path.exists(), f"Missing artifact: {path}")
-            self.assertGreater(path.stat().st_size, 0, f"Empty artifact: {path}")
+    def test_assignment_metrics_and_selected_regularization_exist(self):
+        path = ASSIGNMENT_REGRESSION_OUTPUTS / "metrics.json"
+        self.assertTrue(path.exists(), f"Run python -m regression.assignment first: {path}")
+        metrics = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(metrics["n_train"], 353)
+        self.assertEqual(metrics["n_test"], 89)
+        self.assertTrue(metrics["gradient_descent"]["converged"])
+        self.assertIn("selected_alpha", metrics["models"]["Ridge"])
+        self.assertIn("selected_alpha", metrics["models"]["Lasso"])
 
     def test_outputs_exist_and_non_empty(self):
         required_outputs = [
-            "regression_summary_metrics.csv",
+            "polynomial_complexity.csv",
             "actual_vs_predicted.png",
-            "residuals_plot.png",
-            "feature_importance.png",
-            "cv_model_comparison.png",
-            "ridge_cv_results.csv",
-            "ridge_test_metrics.json",
-            "random_forest_cv_results.csv",
-            "gradient_boosting_cv_results.csv",
-            "svm_rbf_cv_results.csv",
+            "complexity_curve.png",
+            "ridge_cv.csv",
+            "lasso_cv.csv",
+            "test_predictions.csv",
         ]
         for name in required_outputs:
-            path = REGRESSION_OUTPUTS_DIR / name
+            path = ASSIGNMENT_REGRESSION_OUTPUTS / name
             self.assertTrue(path.exists(), f"Missing output file: {path}")
             self.assertGreater(path.stat().st_size, 0, f"Empty output file: {path}")
 

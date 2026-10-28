@@ -18,6 +18,7 @@ from clustering.cluster import (
     CLUSTERING_ARTIFACTS_DIR,
     CLUSTERING_OUTPUTS_DIR,
 )
+from clustering.scratch_kmeans import OUT as ASSIGNMENT_CLUSTERING_OUTPUTS
 
 
 class TestClusteringData(unittest.TestCase):
@@ -75,38 +76,21 @@ class TestClusteringMetrics(unittest.TestCase):
 
 
 class TestClusteringArtifactsAndOutputs(unittest.TestCase):
-    def test_artifacts_exist_and_non_empty(self):
-        required_artifacts = [
-            "scaler.joblib",
-            "kmeans.joblib",
-            "agglomerative.joblib",
-            "dbscan.joblib",
-            "gmm.joblib",
-            "pca.joblib",
-            "metadata.json",
-        ]
-        for name in required_artifacts:
-            path = CLUSTERING_ARTIFACTS_DIR / name
-            self.assertTrue(path.exists(), f"Missing artifact: {path}")
-            self.assertGreater(path.stat().st_size, 0, f"Empty artifact: {path}")
+    def test_assignment_wcss_has_all_requested_k_values(self):
+        path = ASSIGNMENT_CLUSTERING_OUTPUTS / "wcss.csv"
+        self.assertTrue(path.exists(), f"Run python -m clustering.scratch_kmeans first: {path}")
+        results = pd.read_csv(path)
+        self.assertEqual(results["k"].tolist(), [2, 3, 4, 5, 6])
+        self.assertTrue(np.isfinite(results["wcss"]).all())
 
     def test_outputs_exist_and_non_empty(self):
         required_outputs = [
-            "clustering_summary_metrics.csv",
-            "kmeans_k_search_results.csv",
-            "kmeans_contingency_matrix.csv",
-            "agglomerative_contingency_matrix.csv",
-            "dbscan_contingency_matrix.csv",
-            "gmm_contingency_matrix.csv",
-            "kmeans_elbow_silhouette.png",
-            "hierarchical_dendrogram.png",
-            "dbscan_k_distance.png",
-            "gmm_bic_aic.png",
-            "pca_clustering_comparison.png",
-            "feature_pairwise_clusters.png",
+            "wcss.csv",
+            "metadata.json",
+            "elbow_curve.png",
         ]
         for name in required_outputs:
-            path = CLUSTERING_OUTPUTS_DIR / name
+            path = ASSIGNMENT_CLUSTERING_OUTPUTS / name
             self.assertTrue(path.exists(), f"Missing output file: {path}")
             self.assertGreater(path.stat().st_size, 0, f"Empty output file: {path}")
 

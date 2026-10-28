@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 from classification.train import evaluate_model
 
@@ -38,6 +39,14 @@ class TestClassificationEvaluation(unittest.TestCase):
             self.assertEqual(metrics["score_method"], "decision_function")
             self.assertGreaterEqual(metrics["roc_auc"], 0.0)
             self.assertLessEqual(metrics["roc_auc"], 1.0)
+
+    def test_knn_trains_and_writes_valid_classification_metrics(self):
+        model = KNeighborsClassifier(n_neighbors=3).fit(self.X_test, self.y_test)
+        with tempfile.TemporaryDirectory() as tmp:
+            metrics = evaluate_model("knn", model, self.X_test, self.y_test, Path(tmp))
+            self.assertEqual(metrics["score_method"], "predict_proba")
+            self.assertTrue(0 <= metrics["roc_auc"] <= 1)
+            self.assertTrue(0 <= metrics["accuracy"] <= 1)
 
 
 if __name__ == "__main__":
